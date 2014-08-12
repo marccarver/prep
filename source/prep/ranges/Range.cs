@@ -7,13 +7,13 @@ namespace prep.ranges
 {
 	public class Range<T> where T : IComparable<T>
 	{
-		public static IHaveStart<T> StartingFrom(T start)
+		public static IHaveStartInclusive<T> StartingFrom(T start)
 		{
 			var rangeBuilder = new RangeBuilder<T> { Start = start };
 			return rangeBuilder;
 		}
 
-		public static IHaveEnd<T> EndingAt(T end)
+		public static IHaveEndInclusive<T> EndingAt(T end)
 		{
 			var rangeBuilder = new RangeBuilder<T>();
 			rangeBuilder.EndingAt(end);
@@ -22,7 +22,7 @@ namespace prep.ranges
 	}
 
 
-	public class RangeBuilder<T> : IContainValues<T>, IHaveStart<T>, IHaveEnd<T>, IHaveStartExclusive<T>, IHaveEndExclusive<T>
+	public class RangeBuilder<T> : IHaveStartInclusive<T>, IHaveEndInclusive<T>, IHaveStart<T>, IHaveEnd<T>
 		where T : IComparable<T>
 	{
 		public T Start { get; set; }
@@ -37,20 +37,20 @@ namespace prep.ranges
 			return value.CompareTo(Start) >= 0 && value.CompareTo(End) <= 0;
 		}
 
-		public IHaveEnd<T> EndingAt(T value)
+		public IHaveEndInclusive<T> EndingAt(T value)
 		{
 			End = value;
 			return this;
 		}
 
 
-		IHaveStartExclusive<T> IHaveStart<T>.Exclusive()
+		IHaveStart<T> IHaveStartInclusive<T>.Exclusive()
 		{
 			isExclusiveStart = true;
 			return this;
 		}
 
-		IHaveEndExclusive<T> IHaveEnd<T>.Exclusive()
+		IHaveEnd<T> IHaveEndInclusive<T>.Exclusive()
 		{
 			isExclusiveEnd = true;
 			return this;
@@ -58,28 +58,28 @@ namespace prep.ranges
 
 	}
 
+	public interface IHaveStartInclusive<T> : IHaveStart<T>, IContainValues<T> where T : IComparable<T>
+	{
+		IHaveStart<T> Exclusive();
+	}
+
 	public interface IHaveStart<T> : IContainValues<T> where T : IComparable<T>
 	{
-		IHaveEnd<T> EndingAt(T value);
-		IHaveStartExclusive<T> Exclusive();
-
+		IHaveEndInclusive<T> EndingAt(T value);
 	}
 
-	public interface IHaveStartExclusive<T> : IContainValues<T> where T : IComparable<T>
+
+	public interface IHaveEndInclusive<T> : IHaveEnd<T>, IContainValues<T> where T : IComparable<T>
 	{
-		IHaveEnd<T> EndingAt(T value);
+		IHaveEnd<T> Exclusive();
 	}
-
 
 	public interface IHaveEnd<T> : IContainValues<T> where T : IComparable<T>
 	{
-		IHaveEndExclusive<T> Exclusive();
 	}
 
-	public interface IHaveEndExclusive<T> : IContainValues<T> where T : IComparable<T>
-	{
-	}
-
+	
+	// Test
 	public class UseIt
 	{
 		public static void use()
